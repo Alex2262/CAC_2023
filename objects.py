@@ -46,6 +46,26 @@ class ImageRectObject(RectObject):
         surface.blit(self.image, (self.x, self.y))
 
 
+class Block(ImageRectObject):
+    def __init__(self, material_type, row, col):
+        self.material_type = material_type #int index
+        self.name = BLOCK_NAMES[material_type]
+        self.width = BLOCK_SIZE
+        self.height = BLOCK_SIZE
+
+        self.row = row
+        self.col = col
+
+        self.x = col * BLOCK_SIZE
+        self.y = (row + 8) * BLOCK_SIZE
+        super().__init__(NO_COLOR, (self.x, self.y, BLOCK_SIZE, BLOCK_SIZE), 0, 0, BLOCK_IMAGES[self.image])
+
+    def update_block(self, new_type):
+        self.material_type = new_type
+        self.im
+        #image_file
+
+
 # ----------------- The Rectangular Text Object -----------------
 # (extends RectObject)
 class RectTextObject(RectObject):
