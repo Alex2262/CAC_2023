@@ -6,6 +6,10 @@ import pygame.font
 
 from objects import *
 
+from drill import World, Drill
+from game_screen import game_screen
+from code_screen import code_screen
+
 
 # The Main function
 def main():
@@ -23,25 +27,35 @@ def main():
 
     new_mode = 0
 
+    world = World()
+    drill = Drill(world)
+
     while True:
         if new_mode == -1:
             return
         elif new_mode == MAIN_MENU:
             main_menu(screen)
         elif new_mode == CODE_SCREEN:
-            pass
+            code_screen(screen)
         elif new_mode == DRILL_SCREEN:
-            pass
+            game_screen(screen, world, drill)
         elif new_mode == TIP_SCREEN:
             pass
 
 
+# The main menu which you enter the game in
 def main_menu(screen):
 
     # ----------------- Initializing Objects -----------------
     # Used to determine which objects are selected
 
     selected_object = None
+
+    buttons = [
+        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y - 300, 200, 100), 0, 0, "menu:1", "Code", (0, 0, 0), 20),
+        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y - 100, 200, 100), 0, 0, "menu:2", "Drill", (0, 0, 0), 20),
+        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y + 100, 200, 100), 0, 0, "menu:3", "Tips", (0, 0, 0), 20),
+    ]
 
     # ----------------- The Main GUI Loop -----------------
     running = True
@@ -55,11 +69,53 @@ def main_menu(screen):
                 running = False
                 break
 
+            # ----------------- Mouse Released -----------------
+            if event.type == pygame.MOUSEBUTTONUP:
+                mouse_pos = pygame.mouse.get_pos()
+                selected_object = get_selected_object(mouse_pos, buttons)
+
+                if selected_object is None:
+                    continue
+
+                actions = selected_object.action.split(":")
+                if actions[0] == "mode":
+                    if actions[1] != MAIN_MENU:
+                        return actions[1]
+
+        mouse_pos = pygame.mouse.get_pos()
+        selected_object = get_selected_object(mouse_pos, buttons)
+
+        # draw_basic_objects(screen, basic_objects)
+        draw_buttons(screen, selected_object, buttons)
+
         screen.fill(pygame.Color("White"))
         pygame.display.update()
 
     # Once the loop has ended, quit the application
     pygame.quit()
+
+
+# If the mouse is touching an object that can be selected, return it.
+# Else, return None for no selected object
+def get_selected_object(mouse_pos, buttons):
+    for button in buttons:
+        if button.is_selecting(mouse_pos):
+            return button
+
+    return None
+
+
+def draw_basic_objects(screen, basic_objects):
+    for basic_object in basic_objects:
+        basic_object.draw(screen, False)
+
+
+def draw_buttons(screen, selected_object, buttons):
+    for button in buttons:
+        button.draw(screen, selected_object == button)
+
+
+
 
 
 if __name__ == '__main__':

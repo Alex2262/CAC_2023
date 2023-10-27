@@ -1,7 +1,10 @@
 
 # Screen Information
-WIDTH = 1100
-HEIGHT = 700
+WIDTH = 1250
+HEIGHT = 800
+
+CENTER_X = 600
+CENTER_Y = 400
 
 SCREEN_SIZE = (WIDTH, HEIGHT)
 
@@ -15,6 +18,7 @@ TIP_SCREEN   = 3
 GOLD_COLOR = (255, 206, 46)
 MONEY_COLOR = (101, 214, 131)
 COUNT_COLOR = (76, 135, 237)
+NO_COLOR = (0, 0, 0, 0)
 
 # Main Layer component information
 LAYER_LEFT_RECT = (0, 0, 300, HEIGHT)
@@ -70,3 +74,17 @@ for i_upgrade in range(len(UPGRADE_COSTS)):
         UPGRADE_ORDER.append([i_upgrade, j_upgrade])
 
 UPGRADE_ORDER = sorted(UPGRADE_ORDER, key=lambda x: UPGRADE_COSTS[x[0]][x[1]])
+
+
+
+
+# BLOCKS
+
+BLOCK_SIZE = 50
+
+BLOCK_NAMES = ["EMPTY", "DIRT", "STONE"]
+
+DIRECTIONS = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0),}
+
+BLOCK_IMAGES = []
+

@@ -57,7 +57,7 @@ class RectTextObject(RectObject):
         self.text = text
         self.text_color = text_color
 
-        self.font = pygame.font.Font('fonts/HackbotFreeTrial-8MgA2.otf',
+        self.font = pygame.font.Font('fonts/AROneSans-SemiBold.ttf',
                                      text_size)
         self.text_surf = self.font.render(self.text, True, self.text_color)
 
