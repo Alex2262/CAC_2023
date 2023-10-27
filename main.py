@@ -7,9 +7,8 @@ import pygame.font
 from objects import *
 
 
-# The Main function in which all the GUI code is ran
+# The Main function
 def main():
-
     # ----------------- Initializing Pygame Variables -----------------
     pygame.init()
 
@@ -19,7 +18,25 @@ def main():
     time = 0  # Used for keeping track of seconds (60 ticks per second)
 
     screen.fill(pygame.Color("White"))
+    pygame.display.update()
     pygame.display.set_caption("Drill Blocks")  # Game Name?
+
+    new_mode = 0
+
+    while True:
+        if new_mode == -1:
+            return
+        elif new_mode == MAIN_MENU:
+            main_menu(screen)
+        elif new_mode == CODE_SCREEN:
+            pass
+        elif new_mode == DRILL_SCREEN:
+            pass
+        elif new_mode == TIP_SCREEN:
+            pass
+
+
+def main_menu(screen):
 
     # ----------------- Initializing Objects -----------------
     # Used to determine which objects are selected
@@ -37,6 +54,9 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 break
+
+        screen.fill(pygame.Color("White"))
+        pygame.display.update()
 
     # Once the loop has ended, quit the application
     pygame.quit()
