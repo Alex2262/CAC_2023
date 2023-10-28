@@ -76,6 +76,7 @@ class Drill(ImageRectObject):
         self.col = 0
         self.direction = DIRECTIONS["south"]
         self.world = world
+        self.inventory = []
 
 
     def call_main(self):

@@ -191,3 +191,11 @@ def draw_buttons(screen, selected_object, buttons):
     for button in buttons:
         button.draw(screen, selected_object == button)
 
+
+def find_adjacent_block(current_code_object, real_code_blocks):
+    for x in range(current_code_object.x, current_code_object.x + current_code_object.width, 15):
+        for y in range(current_code_object.y - 15, current_code_object.y - 60, -15):
+            adjacent_block = get_selected_object((x, y), real_code_blocks)
+            if adjacent_block is not None:
+                return adjacent_block
+    return None
