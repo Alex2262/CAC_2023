@@ -31,8 +31,8 @@ def game_screen(screen, world, drill):
 
 
 def draw_blocks(screen, world, drill):
-    for i in range(0, math.floor(WIDTH / BLOCK_SIZE), 1):
-        for j in range(0, math.floor(HEIGHT / BLOCK_SIZE), 1):
+    for i in range(0, math.floor(SCREEN_WIDTH / BLOCK_SIZE), 1):
+        for j in range(0, math.floor(SCREEN_HEIGHT / BLOCK_SIZE), 1):
             world.block_screen[i][j].draw(screen, False)
 
 

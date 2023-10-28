@@ -16,31 +16,33 @@ def main():
     # ----------------- Initializing Pygame Variables -----------------
     pygame.init()
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))  # The initial Pygame Screen
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # The initial Pygame Screen
     clock = pygame.time.Clock()  # Clock for adjusting the frames per second
 
     time = 0  # Used for keeping track of seconds (60 ticks per second)
 
-    screen.fill(pygame.Color("White"))
+    screen.fill(MENU_SCREEN_COLOR)
     pygame.display.update()
     pygame.display.set_caption("Drill Blocks")  # Game Name?
 
-    new_mode = 0
+    new_menu = 0
 
     world = World()
     drill = Drill(world)
 
     while True:
-        if new_mode == -1:
-            return
-        elif new_mode == MAIN_MENU:
-            main_menu(screen)
-        elif new_mode == CODE_SCREEN:
-            code_screen(screen)
-        elif new_mode == DRILL_SCREEN:
-            game_screen(screen, world, drill)
-        elif new_mode == TIP_SCREEN:
+        if new_menu == -1:
+            break
+        elif new_menu == MAIN_MENU:
+            new_menu = main_menu(screen)
+        elif new_menu == CODE_SCREEN:
+            new_menu = code_screen(screen)
+        elif new_menu == DRILL_SCREEN:
+            new_menu = game_screen(screen, world, drill)
+        elif new_menu == TIP_SCREEN:
             pass
+
+    pygame.quit()
 
 
 # The main menu which you enter the game in
@@ -52,9 +54,12 @@ def main_menu(screen):
     selected_object = None
 
     buttons = [
-        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y - 300, 200, 100), 0, 0, "menu:1", "Code", (0, 0, 0), 20),
-        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y - 100, 200, 100), 0, 0, "menu:2", "Drill", (0, 0, 0), 20),
-        RectTextButton((255, 0, 0), (CENTER_X - 100, CENTER_Y + 100, 200, 100), 0, 0, "menu:3", "Tips", (0, 0, 0), 20),
+        RectTextButton((46, 52, 64), (CENTER_X - 300, CENTER_Y, 600, 60), 0, 0,
+                       "menu:1", "Code", (76, 86, 106), 44),
+        RectTextButton((46, 52, 64), (CENTER_X - 300, CENTER_Y + 70, 600, 60), 0, 0,
+                       "menu:2", "Drill", (76, 86, 106), 44),
+        RectTextButton((46, 52, 64), (CENTER_X - 300, CENTER_Y + 140, 600, 60), 0, 0,
+                       "menu:3", "Tips", (76, 86, 106), 44),
     ]
 
     # ----------------- The Main GUI Loop -----------------
@@ -78,21 +83,23 @@ def main_menu(screen):
                     continue
 
                 actions = selected_object.action.split(":")
-                if actions[0] == "mode":
+
+                if actions[0] == "menu":
+
                     if actions[1] != MAIN_MENU:
-                        return actions[1]
+                        return int(actions[1])
 
         mouse_pos = pygame.mouse.get_pos()
         selected_object = get_selected_object(mouse_pos, buttons)
 
+        screen.fill(MENU_SCREEN_COLOR)
         # draw_basic_objects(screen, basic_objects)
         draw_buttons(screen, selected_object, buttons)
 
-        screen.fill(pygame.Color("White"))
         pygame.display.update()
 
-    # Once the loop has ended, quit the application
-    pygame.quit()
+    # Exit the application
+    return -1
 
 
 # If the mouse is touching an object that can be selected, return it.
@@ -113,9 +120,6 @@ def draw_basic_objects(screen, basic_objects):
 def draw_buttons(screen, selected_object, buttons):
     for button in buttons:
         button.draw(screen, selected_object == button)
-
-
-
 
 
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 
 # Screen Information
-WIDTH = 1250
-HEIGHT = 800
+SCREEN_WIDTH = 1250
+SCREEN_HEIGHT = 800
 
 CENTER_X = 600
 CENTER_Y = 400
 
-SCREEN_SIZE = (WIDTH, HEIGHT)
+SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 # Modes
 MAIN_MENU    = 0
@@ -15,15 +15,28 @@ DRILL_SCREEN = 2
 TIP_SCREEN   = 3
 
 # Colors
-GOLD_COLOR = (255, 206, 46)
-MONEY_COLOR = (101, 214, 131)
-COUNT_COLOR = (76, 135, 237)
 NO_COLOR = (0, 0, 0, 0)
 
-# Main Layer component information
-LAYER_LEFT_RECT = (0, 0, 300, HEIGHT)
-LAYER_MIDDLE_RECT = (LAYER_LEFT_RECT[2], 0, 400, HEIGHT)
-LAYER_RIGHT_RECT = (LAYER_MIDDLE_RECT[0] + LAYER_MIDDLE_RECT[2], 0, 400, HEIGHT)
+MENU_SCREEN_COLOR = (216, 222, 233)
+
+LAYER_COLORS = [
+    (36, 42, 54),   # NORD DARK 1
+    (46, 52, 64),   # NORD DARK 2
+    (59, 66, 82),   # NORD DARK 3
+    (62, 71, 89),   # NORD DARK 4
+    (67, 76, 94),   # NORD DARK 5
+    (76, 86, 106),  # NORD DARK 6
+
+    (150, 157, 171),
+    (181, 186, 196),
+    (197, 203, 214),
+    (216, 222, 233),  # NORD LIGHT 1
+    (229, 233, 240),  # NORD LIGHT 2
+    (236, 239, 244),  # NORD LIGHT 3
+    (94, 129, 172),      # NORD MID BLUE 1
+    (129, 161, 193),     # NORD MID BLUE 2
+]
+
 
 # Information Layers
 # Each are written to maximize dependency on each other,

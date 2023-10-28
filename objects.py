@@ -167,17 +167,20 @@ class RectTextButton(RectTextObject):
         self.action = action
 
     def draw(self, surface, selected):
-        if selected:
-            pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 255),
-                             (self.x, self.y, self.width, self.height), self.border, self.radius)
-        else:
-            pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 220),
-                             (self.x, self.y, self.width, self.height), self.border, self.radius)
+
+        pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 255),
+                        (self.x, self.y, self.width, self.height), self.border, self.radius)
 
         if self.text != '':
             self.text_surf = self.font.render(self.text, True, self.text_color)
             surface.blit(self.text_surf, (self.x + (self.width / 2 - self.text_surf.get_width() / 2),
                                           self.y + (self.height / 2 - self.text_surf.get_height() / 2)))
+
+        if selected:
+            new_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            new_surface.set_alpha(40)
+            new_surface.fill((0, 0, 0))
+            surface.blit(new_surface, (self.x, self.y))
 
     def is_selecting(self, mouse_pos):
         if self.x < mouse_pos[0] < self.x + self.width and \
