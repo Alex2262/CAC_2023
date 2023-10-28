@@ -10,6 +10,7 @@ def code_screen(screen):
     # ----------------- Initializing Objects -----------------
     # Used to determine which objects are selected
     selected_object = None
+    adjacent_block = None
 
     first_mouse_pos = (0, 0)
     last_canvas_delta = (0, 0)
@@ -26,7 +27,7 @@ def code_screen(screen):
     background_dots = []
 
     basic_objects = [
-        RectObject((197, 203, 214), (0, 0, CODE_BLOCK_TEMPLATES_MARGIN, SCREEN_HEIGHT), 0, 0),
+        RectObject((197, 203, 214), (0, 0, CODE_BLOCK_TEMPLATES_MARGIN + 1, SCREEN_HEIGHT), 0, 0),
         RectObject((197, 203, 214), (RIGHT_SIDE_BAR_MARGIN, 0, 200, SCREEN_HEIGHT), 0, 0),
         DrillForwards((10, 10, 180, 30), True),
     ]
@@ -51,8 +52,8 @@ def code_screen(screen):
 
     # Create the template code blocks
     code_block_template_y = 10
-    for code_block in all_code_blocks:
-        buttons.append(code_block((10, code_block_template_y), True))
+    for code_block_class in all_code_blocks:
+        buttons.append(code_block_class((10, code_block_template_y), True))
         code_block_template_y += basic_objects[-1].height + 10  # +10 for the space in between each code block
 
     current_code_object = None
@@ -98,10 +99,10 @@ def code_screen(screen):
                 if current_code_object is not None:
                     # block held over the deletion area
                     if mouse_pos[0] < CODE_BLOCK_TEMPLATES_MARGIN:
-                        real_code_blocks.remove(current_code_object)
+                        chain = [current_code_object] + current_code_object.get_children()
+                        for code_block in chain:
+                            real_code_blocks.remove(code_block)
 
-                    # block is held near the bottom of another block
-                    adjacent_block = find_adjacent_block(current_code_object, real_code_blocks)
                     if adjacent_block is not None:
                         current_code_object.assign_parent(adjacent_block)
                     else:
@@ -110,6 +111,7 @@ def code_screen(screen):
                         current_code_object.real_y -= canvas_delta[1]
 
                 current_code_object = None  # Have stopped holding any code blocks
+                adjacent_block = None
 
                 scrolling = False
                 last_canvas_delta = canvas_delta
@@ -142,9 +144,16 @@ def code_screen(screen):
             shift_code_blocks(real_code_blocks, canvas_delta)
             shift_background_dots(background_dots, canvas_delta)
 
+        # Useful for debugging purposes
+        adjacency_dots = []
+
         # Holding
         if current_code_object is not None:
             current_code_object.hold(mouse_pos)
+
+            # Adjacency
+            # block is held near the bottom of another block
+            adjacent_block = find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots)
 
         screen.fill(MENU_SCREEN_COLOR)
 
@@ -152,10 +161,16 @@ def code_screen(screen):
         draw_buttons(screen, selected_object, real_code_blocks)
         draw_basic_objects(screen, basic_objects)
         draw_buttons(screen, selected_object, buttons)
+        # draw_basic_objects(screen, adjacency_dots)
+
+        # Highlight Adjacency
+        if adjacent_block is not None:
+            adjacent_block.highlight_adjacency(screen)
 
         # Redraw the current code object on the top
         if current_code_object is not None:
-            draw_buttons(screen, selected_object, [current_code_object])
+            chain = [current_code_object] + current_code_object.get_children()
+            draw_buttons(screen, selected_object, chain)
 
         pygame.display.update()
 
@@ -192,10 +207,14 @@ def draw_buttons(screen, selected_object, buttons):
         button.draw(screen, selected_object == button)
 
 
-def find_adjacent_block(current_code_object, real_code_blocks):
-    for x in range(current_code_object.x, current_code_object.x + current_code_object.width, 15):
-        for y in range(current_code_object.y - 15, current_code_object.y - 60, -15):
-            adjacent_block = get_selected_object((x, y), real_code_blocks)
-            if adjacent_block is not None:
-                return adjacent_block
-    return None
+def find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots):
+    adjacent_block = None
+    for c_x in range(current_code_object.x, current_code_object.x + current_code_object.width, 15):
+        for c_y in range(current_code_object.y - 15, current_code_object.y - 45, -15):
+            adjacency_dots.append(RectObject(LAYER_COLORS[1], (c_x, c_y, 1, 1), 0, 0))
+
+            # Detect the closest one, but don't break so adjacency_dots are found
+            if adjacent_block is None:
+                adjacent_block = get_selected_object((c_x, c_y), real_code_blocks)
+
+    return adjacent_block

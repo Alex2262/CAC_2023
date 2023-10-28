@@ -38,6 +38,9 @@ class CodeBlock(RectTextButton):
         self.x = new_x
         self.y = new_y
 
+        if self.child is not None:
+            self.child.hold((mouse_pos[0], mouse_pos[1] + self.height))
+
     def shift(self, deltas):  # scrolling
         self.x = self.real_x + deltas[0]
         self.y = self.real_y + deltas[1]
@@ -46,13 +49,11 @@ class CodeBlock(RectTextButton):
         if parent_block.child is not None:
             pass
         if parent_block is None:
-            print("Oh no no parent")
             if self.parent is not None:
                 self.parent.child = None
                 self.parent = None
         else:
-            print("HI")
-            print(parent_block.real_x, parent_block.real_y)
+            parent_block.child = self
             self.parent = parent_block  # this oop does not copy the object right
             self.real_x = parent_block.real_x
             self.real_y = parent_block.real_y + parent_block.height
@@ -60,6 +61,17 @@ class CodeBlock(RectTextButton):
             self.x = parent_block.x
             self.y = parent_block.y + parent_block.height
             parent_block.child = self
+
+    def get_children(self):
+        if self.child is None:
+            return []
+
+        children = [self.child] + self.child.get_children()
+        return children
+
+    def highlight_adjacency(self, surface):
+        pygame.draw.rect(surface, (255, 255, 255),
+                         (self.x, self.y + self.height - 1, self.width, 2), 0, self.radius)
 
 
 class DrillForwards(CodeBlock):

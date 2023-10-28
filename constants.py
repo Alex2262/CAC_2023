@@ -88,9 +88,7 @@ for i_upgrade in range(len(UPGRADE_COSTS)):
     for j_upgrade in range(len(UPGRADE_COSTS[i_upgrade])):
         UPGRADE_ORDER.append([i_upgrade, j_upgrade])
 
-UPGRADE_ORDER = sorted(UPGRADE_ORDER, key=lambda x: UPGRADE_COSTS[x[0]][x[1]])
-
-
+UPGRADE_ORDER = sorted(UPGRADE_ORDER, key=lambda xxxx: UPGRADE_COSTS[xxxx[0]][xxxx[1]])
 
 
 # BLOCKS
@@ -110,7 +108,7 @@ class BlockMaterial(Enum):
     LAVA = 6
 
 
-BIOME_SIZE = 30 #the amount of blocks before new stuff can begin spawning
+BIOME_SIZE = 30  # the amount of Y level blocks before new stuff can begin spawning
 
 DIRECTIONS = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0),}
 
