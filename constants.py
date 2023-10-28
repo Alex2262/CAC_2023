@@ -1,4 +1,6 @@
 
+from enum import Enum
+
 # Screen Information
 SCREEN_WIDTH = 1250
 SCREEN_HEIGHT = 800
@@ -95,7 +97,20 @@ UPGRADE_ORDER = sorted(UPGRADE_ORDER, key=lambda x: UPGRADE_COSTS[x[0]][x[1]])
 
 BLOCK_SIZE = 50
 
-BLOCK_NAMES = ["EMPTY", "DIRT", "STONE"]
+BLOCK_NAMES = ["EMPTY", "DIRT", "STONE", "COAL", "ROCK", "IRON", "LAVA"]
+
+
+class BlockMaterial(Enum):
+    EMPTY = 0
+    DIRT = 1
+    STONE = 2
+    COAL = 3
+    ROCK = 4
+    IRON = 5
+    LAVA = 6
+
+
+BIOME_SIZE = 30 #the amount of blocks before new stuff can begin spawning
 
 DIRECTIONS = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0),}
 

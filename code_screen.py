@@ -10,7 +10,8 @@ def code_screen(screen):
 
     basic_objects = [
         RectObject((197, 203, 214), (0, 0, 200, SCREEN_HEIGHT), 0, 0),
-        RectObject((197, 203, 214), (SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT), 0, 0)
+        RectObject((197, 203, 214), (SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT), 0, 0),
+        RectObject((255, 203, 214), (0, 0, 50, 50), 0, 0),
     ]
 
     buttons = [

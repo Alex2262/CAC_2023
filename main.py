@@ -27,7 +27,11 @@ def main():
 
     new_menu = 0
 
-    world = World()
+    world = World(0)
+    seed = random.randrange(100000, 999999)
+    world.initialize_block_map()
+    print(world.block_map)
+    print(seed)
     drill = Drill(world)
 
     while True:
