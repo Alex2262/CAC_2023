@@ -5,12 +5,47 @@ import math
 
 
 class World:
-    def __init__(self):
-        self.block_map = []
-        self.block_screen = []
+    def __init__(self, seed):
+
+        self.block_screen = [] #Block objects
+        self.seed = seed
+        self.block_map = [] #ints referring to block type
 
     def initialize_block_map(self):
-        pass
+        self.block_map = []
+
+        for i in range(20):
+            block_row = []
+            for j in range(SCREEN_WIDTH // BLOCK_SIZE):
+
+                lower_bound = int(BlockMaterial.DIRT.value)
+                upper_bound = min(max(i // BIOME_SIZE, BlockMaterial.COAL.value), len(BLOCK_NAMES)-1)
+                material_type = BlockMaterial.EMPTY.value
+
+                # air is independent
+                non_empty_chance = 30 + (i // 4)
+                if random.randint(0, 100) < non_empty_chance or i < 2:
+                    material_type = random.randint(lower_bound, upper_bound)
+                    
+                
+                
+                # random ([lowerbound, upperbound])
+                # if max_index <= 2:
+                #     material_type = (seed + (j+1) % (i+1)) % (max_index+3) + 1
+                # elif (seed+i) % 3 > 0:
+                #     if seed // 10 % 9 <= 1:
+                #         material_type = BlockMaterial.EMPTY
+                #     elif seed // 10 % 9 <= 5:
+                #         material_type = BlockMaterial.DIRT
+                #     elif seed // 10 % 9 <= 7:
+                #         material_type = BlockMaterial.STONE
+                #     else:
+                #         material_type = BlockMaterial.LAVA
+                # else:
+                #     material_type = (seed + (j+1) % (i+1) + 1) % (max_index+1) + 1
+
+                block_row.append(material_type)
+            self.block_map.append(block_row)
 
     def initialize_block_screen(self):
         for i in range(0, SCREEN_WIDTH // BLOCK_SIZE, 1):
