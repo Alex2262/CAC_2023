@@ -6,6 +6,11 @@ BASIC_CODE_BLOCK_HEIGHT = 30
 BASIC_CODE_BLOCK_WIDTH  = 200
 CONTAINER_LEFT_MARGIN   = 20
 
+FAILED_ATTACHMENT = -1
+BASIC_MODE = 0
+NEST_MODE = 1
+PARAMETER_MODE = 2
+
 
 class BackgroundDot(RectObject):
     def __init__(self, position):
@@ -31,12 +36,20 @@ class CodeBlock(RectTextButton):
 
         self.string_code = ""
         self.parent = None
-        self.child = None  # blocks that are attached to bottom
+        self.bottom_child = None  # blocks that are attached to bottom
+        self.nested_child = None
         self.parameters = []  # Takes 0 parameters
+
+    def update_height(self):
+        if self.parent is not None:
+            self.parent.update_height()
 
     def hold(self, mouse_pos):
         new_x = mouse_pos[0] - self.width // 2
         new_y = mouse_pos[1] - self.height // 2
+
+        if self.is_container:  # For containers, hold the top rectangle, not the center
+            new_y = mouse_pos[1] - BASIC_CODE_BLOCK_HEIGHT // 2
 
         # Change the real position when the mouse is moving it
         self.real_x += new_x - self.x
@@ -45,69 +58,115 @@ class CodeBlock(RectTextButton):
         self.x = new_x
         self.y = new_y
 
-        if self.child is not None:  # Move the child with the mouse when holding
-            self.child.hold((mouse_pos[0], mouse_pos[1] + self.height))
+        self.relocate_children()
 
-        if self.parent is not None and self.parent.y + self.parent.height != self.y:
-            self.parent.child = None
-            self.parent = None
+        if self.parent is not None:
+
+            # Removing a nested block
+            if self.parent.is_container and self.parent.nested_child == self and\
+               self.parent.y + BASIC_CODE_BLOCK_HEIGHT != self.y:
+                self.parent.nested_child = None
+
+                # Adjust the parent container's bottom children once this nested block is remove
+                self.parent.update_height()
+                self.parent = None
+
+            # Removing a normal block
+            elif self.parent.bottom_child == self and self.parent.y + self.parent.height != self.y:
+                self.parent.bottom_child = None
+                self.parent = None
 
     def shift(self, deltas):  # scrolling
         self.x = self.real_x + deltas[0]
         self.y = self.real_y + deltas[1]
 
+    def get_attachment_mode(self, position):
+        return BASIC_MODE
+
     def relocate_children(self):
-        if self.child is not None:  # Move child to the new location in a chain
-            self.child.assign_parent(self)
+        if self.bottom_child is not None:  # Move child to the new location in a chain
+            self.bottom_child.assign_parent(self, BASIC_MODE)
         for parameter in self.parameters:
             if parameter is not None:
-                parameter.assign_parent(self)
+                parameter.assign_parent(self, PARAMETER_MODE)
 
-    def assign_parent(self, parent_block):
+    def assign_parent(self, parent_block, attachment_mode):
 
-        # Removing Parent
-        if parent_block is None:
-            if self.parent is not None:
-                self.parent.child = None
-                self.parent = None
-            return
+        if attachment_mode == BASIC_MODE:
+            # Removing Parent
+            if parent_block is None:
+                if self.parent is not None:
+                    self.parent.bottom_child = None
+                    self.parent = None
+                return
 
-        x_margin = 0
-        if parent_block.is_container and parent_block.nested_child == self:
-            x_margin = CONTAINER_LEFT_MARGIN
-        if self.is_parameter:
-            x_margin = 30
+            self.real_x = parent_block.real_x
+            self.real_y = parent_block.real_y + parent_block.height
 
-        self.real_x = parent_block.real_x + x_margin
-        self.real_y = parent_block.real_y + parent_block.height
+            self.x = parent_block.x
+            self.y = parent_block.y + parent_block.height
 
-        self.x = parent_block.x + x_margin
-        self.y = parent_block.y + parent_block.height
+            self.relocate_children()
 
-        self.relocate_children()
+            # Guard clause, parent child is self
+            if parent_block.bottom_child == self:
+                return
 
-        # Guard clause, parent child is self
-        if parent_block.child == self:
-            return
+            self.parent = parent_block
 
-        self.parent = parent_block
+            # Insertion
+            if parent_block.bottom_child is not None:
+                # Move the parent's old child to the end of this block's chain
+                chain = [self] + self.get_children()
+                parent_block.bottom_child.assign_parent(chain[-1], BASIC_MODE)  # Ignore useless warning
 
-        # Insertion
-        if parent_block.child is not None:
-            # Move the parent's old child to the end of this block's chain
-            chain = [self] + self.get_children()
-            parent_block.child.assign_parent(chain[-1])
+            parent_block.bottom_child = self
+            parent_block.update_height()
 
-        parent_block.child = self
+        elif attachment_mode == NEST_MODE:  # Parent must be of Container type
+            # Removing Parent
+            if parent_block is None:
+                if self.parent is not None:
+                    self.parent.nested_child = None
+                    self.parent = None
+                return
+
+            self.real_x = parent_block.real_x + CONTAINER_LEFT_MARGIN
+            self.real_y = parent_block.real_y + BASIC_CODE_BLOCK_HEIGHT
+
+            self.x = parent_block.x + CONTAINER_LEFT_MARGIN
+            self.y = parent_block.y + BASIC_CODE_BLOCK_HEIGHT
+
+            self.relocate_children()
+
+            # Guard clause, parent child is self
+            if parent_block.nested_child == self:
+                return
+
+            self.parent = parent_block
+
+            # Insertion
+            if parent_block.nested_child is not None:
+                # Move the parent's old child to the end of this block's chain
+                chain = [self] + self.get_children()
+                parent_block.nested_child.assign_parent(chain[-1], BASIC_MODE)  # Ignore useless warning
+                parent_block.update_height()
+
+            parent_block.nested_child = self
+            parent_block.update_height()
+
+            # Parent's Block Height is updated so push bottom blocks down
+            if parent_block.bottom_child is not None:
+                parent_block.bottom_child.assign_parent(parent_block, BASIC_MODE)
 
     def get_children(self):
-        if self.child is None:
+        if self.bottom_child is None:
             return []
 
-        children = [self.child] + self.child.get_children()
+        children = [self.bottom_child] + self.bottom_child.get_children()
         return children
 
-    def highlight_adjacency(self, surface):
+    def highlight_adjacency(self, surface, mode):
         pygame.draw.rect(surface, (255, 255, 155),
                          (self.x, self.y + self.height - 2, self.width, 3), 0, self.radius)
 
@@ -118,6 +177,18 @@ class Container(CodeBlock):
                          is_template, text, text_color, text_size)
         self.is_container = True
         self.nested_child = None
+        self.update_height()
+
+    def update_height(self):
+        super().update_height()
+
+        top_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
+        bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        self.height = top_rect_height + left_rect_height + bottom_rect_height
+
+        if self.bottom_child is not None:
+            self.bottom_child.assign_parent(self, BASIC_MODE)
 
     def draw(self, surface, selected):
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
@@ -165,17 +236,38 @@ class Container(CodeBlock):
             new_surface.fill((0, 0, 0))
             surface.blit(new_surface, (self.x, self.y + top_rect_height + left_rect_height))
 
+    def hold(self, mouse_pos):
+        super().hold(mouse_pos)
+        if self.nested_child is not None:
+            self.nested_child.hold((mouse_pos[0] + CONTAINER_LEFT_MARGIN, mouse_pos[1] + BASIC_CODE_BLOCK_HEIGHT))
+
     def get_nested_children(self):
         if self.nested_child is None:
             return []
 
         return [self.nested_child] + self.nested_child.get_children()
 
+    def get_attachment_mode(self, position):
+        # Assumes the object has been selected
+        top_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
+        # bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+
+        # NESTING ATTACHMENT MODE
+        if position[1] < self.y + top_rect_height:
+            return NEST_MODE
+
+        if position[1] < self.y + top_rect_height + left_rect_height:
+            return FAILED_ATTACHMENT
+
+        return BASIC_MODE
+
     def relocate_children(self):
-        if self.child is not None:  # Move child to the new location in a chain
-            self.child.assign_parent(self)
+        super().relocate_children()
         if self.nested_child is not None:  # Move nested child to the new location in a chain
-            self.nested_child.assign_parent(self)
+            print(self.x, self.y, self.nested_child.x, self.nested_child.y)
+            self.nested_child.assign_parent(self, NEST_MODE)
+            print(self.x, self.y, self.nested_child.x, self.nested_child.y)
 
     def is_selecting(self, mouse_pos):
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
@@ -200,6 +292,16 @@ class Container(CodeBlock):
             return True
 
         return False
+
+    def highlight_adjacency(self, surface, mode):
+        top_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        if mode == NEST_MODE:
+            pygame.draw.rect(surface, (255, 255, 155),
+                             (self.x + CONTAINER_LEFT_MARGIN, self.y + top_rect_height - 2,
+                              self.width - CONTAINER_LEFT_MARGIN, 3), 0, self.radius)
+        else:
+            pygame.draw.rect(surface, (255, 255, 155),
+                            (self.x, self.y + self.height - 2, self.width, 3), 0, self.radius)
 
 
 class Main(CodeBlock):
@@ -290,7 +392,7 @@ self.direction = (self.direction[1], -self.direction[0])
 class Conditional(Container):
     def __init__(self, position, is_template):
         self.width = BASIC_CODE_BLOCK_WIDTH
-        self.height = BASIC_CODE_BLOCK_HEIGHT
+        self.height = 1
         super().__init__((245, 200, 0),
                          (position[0], position[1], self.width, self.height), is_template, "if")
 

@@ -12,6 +12,7 @@ def code_screen(screen, drill):
     clock = pygame.time.Clock()  # Clock for adjusting the frames per second
     selected_object = None
     adjacent_block = None
+    attachment_mode = FAILED_ATTACHMENT
 
     first_mouse_pos = (0, 0)
     last_canvas_delta = (0, 0)
@@ -105,7 +106,7 @@ def code_screen(screen, drill):
                             drill.real_code_blocks.remove(code_block)
 
                     if adjacent_block is not None:
-                        current_code_object.assign_parent(adjacent_block)
+                        current_code_object.assign_parent(adjacent_block, attachment_mode)
                     else:
                         # Map the real x and y accordingly
                         current_code_object.real_x = current_code_object.x - canvas_delta[0]
@@ -159,7 +160,8 @@ def code_screen(screen, drill):
 
             # Adjacency
             # block is held near the bottom of another block
-            adjacent_block = find_adjacent_block(current_code_object, drill.real_code_blocks, adjacency_dots)
+            adjacent_block, attachment_mode = find_adjacent_block(current_code_object,
+                                                                  drill.real_code_blocks, adjacency_dots)
 
         screen.fill(MENU_SCREEN_COLOR)
 
@@ -171,7 +173,7 @@ def code_screen(screen, drill):
 
         # Highlight Adjacency
         if adjacent_block is not None:
-            adjacent_block.highlight_adjacency(screen)
+            adjacent_block.highlight_adjacency(screen, attachment_mode)
 
         # Redraw the current code object on the top
         if current_code_object is not None:
@@ -216,6 +218,7 @@ def draw_buttons(screen, selected_object, buttons):
 
 def find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots):
     adjacent_block = None
+    mode = FAILED_ATTACHMENT
     for c_x in range(current_code_object.x + 15, current_code_object.x + current_code_object.width - 15, 15):
         for c_y in range(current_code_object.y - 15, current_code_object.y - 45, -15):
             adjacency_dots.append(RectObject(LAYER_COLORS[1], (c_x, c_y, 1, 1), 0, 0))
@@ -224,4 +227,9 @@ def find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots):
             if adjacent_block is None:
                 adjacent_block = get_selected_object((c_x, c_y), real_code_blocks)
 
-    return adjacent_block
+                if adjacent_block is not None:
+                    mode = adjacent_block.get_attachment_mode((c_x, c_y))
+                    if mode == FAILED_ATTACHMENT:
+                        adjacent_block = None
+
+    return adjacent_block, mode
