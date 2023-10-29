@@ -76,6 +76,7 @@ def game_screen(screen, world, drill):
 
             drill_thread = threading.Thread(target=drill.call_main, args=())
             drill_thread.start()
+            #bug: for a script with multiple blocks it needs to update the screen every time a block is run. Currently, it only moves after a sequence of blocks is compiled.
 
         if drill.energy < 0:
             drill.die()

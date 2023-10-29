@@ -3,6 +3,7 @@ import time
 
 from objects import *
 import math
+from game_screen import draw_blocks
 
 
 class World:
@@ -99,6 +100,8 @@ class Drill(ImageRectObject):
         code_string = ""
         while compiling:
             code_string += next_block.string_code
+            code_string += "\nself.world.update_block_screen(self.row)"
+
 
             if next_block.child is None:
                 break

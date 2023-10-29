@@ -111,6 +111,8 @@ def code_screen(screen, drill):
                         current_code_object.real_x = current_code_object.x - canvas_delta[0]
                         current_code_object.real_y = current_code_object.y - canvas_delta[1]
 
+                        # we should add a feature to allow inserting code between blocks
+
                     if type(current_code_object) == Main:
                         drill.main_block = current_code_object
 
