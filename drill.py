@@ -112,5 +112,5 @@ class Drill(ImageRectObject):
         self.running = False
 
     def die(self):
-        pass
-
+        self.row= 0
+        self.energy = STARTING_ENERGY

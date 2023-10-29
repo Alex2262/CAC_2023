@@ -54,6 +54,7 @@ ITEM_NAMES = []
 
 ITEM_PRICES = []
 ITEM_RATES = []
+STARTING_ENERGY = 100
 
 # The descriptions for the tower popups
 ITEM_INFO = [
@@ -111,12 +112,12 @@ class BlockMaterial(Enum):
     LAVA = 7
 
 
-BIOME_SIZE = 30  # the amount of Y level blocks before new stuff can begin spawning
+BIOME_SIZE = 10  # the amount of Y level blocks before new stuff can begin spawning
 
 DIRECTIONS = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0),}
 
-BLOCK_IMAGES = ["", "blocks/dirt.png", "blocks/stone.png", "blocks/coal.png", "blocks/iron.png", "blocks/gold.png",
-                "blocks/hard_stone.png", "blocks/lava.png" , "" , "", ""]
+BLOCK_IMAGES = ["", "blocks/dirt.png", "blocks/stone.png", "blocks/coal.png", "blocks/hard_stone.png", "blocks/iron.png",
+                "blocks/gold.png", "blocks/lava.png" , "" , "", ""]
 
 CODEBLOCK_COLORS = ["BLUE", "GREEN"]
 
