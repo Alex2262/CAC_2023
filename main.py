@@ -17,7 +17,6 @@ def main():
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # The initial Pygame Screen
-    clock = pygame.time.Clock()  # Clock for adjusting the frames per second
 
     time = 0  # Used for keeping track of seconds (60 ticks per second)
 
@@ -27,12 +26,12 @@ def main():
 
     new_menu = 0
 
-    world = World(0)
-    seed = random.randrange(100000, 999999)
+    world = World()
     world.initialize_block_map()
-    print(world.block_map)
-    print(seed)
+    world.initialize_block_screen()
+
     drill = Drill(world)
+    world.update_block_screen(drill.row)
 
     while True:
         if new_menu == -1:
@@ -40,7 +39,7 @@ def main():
         elif new_menu == MAIN_MENU:
             new_menu = main_menu(screen)
         elif new_menu == CODE_SCREEN:
-            new_menu = code_screen(screen)
+            new_menu = code_screen(screen, drill)
         elif new_menu == DRILL_SCREEN:
             new_menu = game_screen(screen, world, drill)
         elif new_menu == TIP_SCREEN:
@@ -53,8 +52,8 @@ def main():
 def main_menu(screen):
 
     # ----------------- Initializing Objects -----------------
-    # Used to determine which objects are selected
 
+    clock = pygame.time.Clock()  # Clock for adjusting the frames per second
     selected_object = None
 
     buttons = [
@@ -100,6 +99,7 @@ def main_menu(screen):
         # draw_basic_objects(screen, basic_objects)
         draw_buttons(screen, selected_object, buttons)
 
+        clock.tick(60)
         pygame.display.update()
 
     # Exit the application

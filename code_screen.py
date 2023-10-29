@@ -5,10 +5,11 @@ CODE_BLOCK_TEMPLATES_MARGIN = 230
 RIGHT_SIDE_BAR_MARGIN = SCREEN_WIDTH - 200
 
 
-def code_screen(screen):
+def code_screen(screen, drill):
 
     # ----------------- Initializing Objects -----------------
-    # Used to determine which objects are selected
+
+    clock = pygame.time.Clock()  # Clock for adjusting the frames per second
     selected_object = None
     adjacent_block = None
 
@@ -19,6 +20,7 @@ def code_screen(screen):
 
     # Used for creating the template code blocks
     all_code_blocks = [
+        Main,
         DrillForwards,
         TurnLeft,
         TurnRight
@@ -42,8 +44,6 @@ def code_screen(screen):
         RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 500, 180, 40), 0, 0,
                        "zoom:center", "Center", (197, 203, 214), 30),
     ]
-
-    real_code_blocks = []
 
     # Create the background dots
     for b_x in range(CODE_BLOCK_TEMPLATES_MARGIN, RIGHT_SIDE_BAR_MARGIN, 20):
@@ -73,7 +73,7 @@ def code_screen(screen):
             # ----------------- Mouse Clicked -----------------
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                selected_object = get_selected_object(mouse_pos, buttons + real_code_blocks)
+                selected_object = get_selected_object(mouse_pos, buttons + drill.real_code_blocks)
 
                 if selected_object is None:
                     if CODE_BLOCK_TEMPLATES_MARGIN < mouse_pos[0] < RIGHT_SIDE_BAR_MARGIN:
@@ -86,29 +86,32 @@ def code_screen(screen):
                 if actions[0] == "codeblock":
 
                     if selected_object.is_template:
-                        real_code_blocks.append(type(selected_object)((10, selected_object.real_y), False))
-                        current_code_object = real_code_blocks[-1]
+                        drill.real_code_blocks.append(type(selected_object)((10, selected_object.real_y), False))
+                        current_code_object = drill.real_code_blocks[-1]
                     elif CODE_BLOCK_TEMPLATES_MARGIN < mouse_pos[0] < RIGHT_SIDE_BAR_MARGIN:
                         current_code_object = selected_object
 
             # ----------------- Mouse Released -----------------
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_pos = pygame.mouse.get_pos()
-                selected_object = get_selected_object(mouse_pos, buttons + real_code_blocks)
+                selected_object = get_selected_object(mouse_pos, buttons + drill.real_code_blocks)
 
                 if current_code_object is not None:
                     # block held over the deletion area
                     if mouse_pos[0] < CODE_BLOCK_TEMPLATES_MARGIN:
                         chain = [current_code_object] + current_code_object.get_children()
                         for code_block in chain:
-                            real_code_blocks.remove(code_block)
+                            drill.real_code_blocks.remove(code_block)
 
                     if adjacent_block is not None:
                         current_code_object.assign_parent(adjacent_block)
                     else:
                         # Map the real x and y accordingly
-                        current_code_object.real_x -= canvas_delta[0]
-                        current_code_object.real_y -= canvas_delta[1]
+                        current_code_object.real_x = current_code_object.x - canvas_delta[0]
+                        current_code_object.real_y = current_code_object.y - canvas_delta[1]
+
+                    if type(current_code_object) == Main:
+                        drill.main_block = current_code_object
 
                 current_code_object = None  # Have stopped holding any code blocks
                 adjacent_block = None
@@ -130,7 +133,7 @@ def code_screen(screen):
                     if actions[1] == "center":
                         last_canvas_delta = (0, 0)
                         canvas_delta = (0, 0)
-                        shift_code_blocks(real_code_blocks, canvas_delta)
+                        shift_code_blocks(drill.real_code_blocks, canvas_delta)
                         shift_background_dots(background_dots, canvas_delta)
 
         mouse_pos = pygame.mouse.get_pos()
@@ -141,7 +144,7 @@ def code_screen(screen):
             deltas = (mouse_pos[0] - first_mouse_pos[0], mouse_pos[1] - first_mouse_pos[1])
 
             canvas_delta = (last_canvas_delta[0] + deltas[0], last_canvas_delta[1] + deltas[1])
-            shift_code_blocks(real_code_blocks, canvas_delta)
+            shift_code_blocks(drill.real_code_blocks, canvas_delta)
             shift_background_dots(background_dots, canvas_delta)
 
         # Useful for debugging purposes
@@ -153,12 +156,12 @@ def code_screen(screen):
 
             # Adjacency
             # block is held near the bottom of another block
-            adjacent_block = find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots)
+            adjacent_block = find_adjacent_block(current_code_object, drill.real_code_blocks, adjacency_dots)
 
         screen.fill(MENU_SCREEN_COLOR)
 
         draw_basic_objects(screen, background_dots)
-        draw_buttons(screen, selected_object, real_code_blocks)
+        draw_buttons(screen, selected_object, drill.real_code_blocks)
         draw_basic_objects(screen, basic_objects)
         draw_buttons(screen, selected_object, buttons)
         # draw_basic_objects(screen, adjacency_dots)
@@ -172,6 +175,7 @@ def code_screen(screen):
             chain = [current_code_object] + current_code_object.get_children()
             draw_buttons(screen, selected_object, chain)
 
+        clock.tick(60)
         pygame.display.update()
 
     return -1
@@ -209,7 +213,7 @@ def draw_buttons(screen, selected_object, buttons):
 
 def find_adjacent_block(current_code_object, real_code_blocks, adjacency_dots):
     adjacent_block = None
-    for c_x in range(current_code_object.x, current_code_object.x + current_code_object.width, 15):
+    for c_x in range(current_code_object.x + 15, current_code_object.x + current_code_object.width - 15, 15):
         for c_y in range(current_code_object.y - 15, current_code_object.y - 45, -15):
             adjacency_dots.append(RectObject(LAYER_COLORS[1], (c_x, c_y, 1, 1), 0, 0))
 

@@ -38,29 +38,43 @@ class CodeBlock(RectTextButton):
         self.x = new_x
         self.y = new_y
 
-        if self.child is not None:
+        if self.child is not None:  # Move the child with the mouse when holding
             self.child.hold((mouse_pos[0], mouse_pos[1] + self.height))
+
+        if self.parent is not None and self.parent.y + self.parent.height != self.y:
+            print("real")
+            self.parent.child = None
+            self.parent = None
 
     def shift(self, deltas):  # scrolling
         self.x = self.real_x + deltas[0]
         self.y = self.real_y + deltas[1]
 
     def assign_parent(self, parent_block):
-        if parent_block.child is not None:
-            pass
         if parent_block is None:
             if self.parent is not None:
                 self.parent.child = None
                 self.parent = None
+        elif parent_block.child == self:
+            self.real_x = parent_block.real_x
+            self.real_y = parent_block.real_y + parent_block.height
+
+            self.x = parent_block.x
+            self.y = parent_block.y + parent_block.height
+        elif parent_block.child is not None:
+            pass
         else:
             parent_block.child = self
-            self.parent = parent_block  # this oop does not copy the object right
+            self.parent = parent_block
             self.real_x = parent_block.real_x
             self.real_y = parent_block.real_y + parent_block.height
 
             self.x = parent_block.x
             self.y = parent_block.y + parent_block.height
             parent_block.child = self
+
+            if self.child is not None:  # Move child to the new location in a chain
+                self.child.assign_parent(self)
 
     def get_children(self):
         if self.child is None:
@@ -70,8 +84,26 @@ class CodeBlock(RectTextButton):
         return children
 
     def highlight_adjacency(self, surface):
-        pygame.draw.rect(surface, (255, 255, 255),
-                         (self.x, self.y + self.height - 1, self.width, 2), 0, self.radius)
+        pygame.draw.rect(surface, (255, 255, 155),
+                         (self.x, self.y + self.height - 2, self.width, 3), 0, self.radius)
+
+
+class Main(CodeBlock):
+    def __init__(self, position, is_template):
+        self.width = 200
+        self.height = 30
+        super().__init__((255, 0, 0),
+                         (position[0], position[1], self.width, self.height), is_template, "Main")
+
+        '''
+        Moves the drill forwards in the current direction and removes the block in its new position
+        '''
+
+        self.string_code = """
+
+# This is the main code it really doesn't do shit lolololol ok fuck
+
+        """
 
 
 class DrillForwards(CodeBlock):
@@ -87,10 +119,19 @@ class DrillForwards(CodeBlock):
 
         self.string_code = """
         
-        self.col += self.direction[0]
-        self.row += self.direction[1]
-        
-        self.world.block_map[self.col][self.row] = BLOCK_NAMES.index("EMPTY")
+
+self.col = min(max(0, self.col + self.direction[0]), SCREEN_WIDTH // BLOCK_SIZE - 1)
+self.row += self.direction[1]
+
+self.x += self.direction[0] * BLOCK_SIZE
+
+if self.world.block_map[self.row][self.col] == BlockMaterial.LAVA.value:
+    self.die()
+else:
+    wait_time = WAIT_TIMES[self.world.block_map[self.row][self.col]]
+    
+    time.sleep(wait_time)
+    self.world.block_map[self.row][self.col] = BlockMaterial.EMPTY.value
         
         """
 
@@ -108,7 +149,7 @@ class TurnLeft(CodeBlock):
 
         self.string_code = """
 
-        (self.direction[0], self.direction[1]) = (-self.direction[1], self.direction[0])
+self.direction = (-self.direction[1], self.direction[0])
             
         """
 
@@ -126,7 +167,7 @@ class TurnRight(CodeBlock):
 
         self.string_code = """
 
-        (self.direction[0], self.direction[1]) = (self.direction[1], -self.direction[0])
+self.direction = (self.direction[1], -self.direction[0])
 
         """
 

@@ -40,15 +40,15 @@ class ImageRectObject(RectObject):
     def __init__(self, color, rect, border, radius, image_file):
         super().__init__(color, rect, border, radius)
         self.image_file = image_file
-        self.image = pygame.image.load(self.image_file).convert_alpha()
+        self.image = pygame.image.load(self.image_file).convert_alpha() if self.image_file != "" else None
 
     def draw(self, surface, selected):
         surface.blit(self.image, (self.x, self.y))
 
 
 class Block(ImageRectObject):
-    def __init__(self, material_type, row, col):
-        self.material_type = material_type #int index
+    def __init__(self, material_type, row, col, preloaded_image):
+        self.material_type = material_type  # int index
         self.name = BLOCK_NAMES[material_type]
         self.width = BLOCK_SIZE
         self.height = BLOCK_SIZE
@@ -58,9 +58,11 @@ class Block(ImageRectObject):
 
         self.x = col * BLOCK_SIZE
         self.y = (row + 8) * BLOCK_SIZE
-        super().__init__(NO_COLOR, (self.x, self.y, BLOCK_SIZE, BLOCK_SIZE), 0, 0, BLOCK_IMAGES[self.image])
 
-    def update_block(self, new_type):
+        # Pass empty image file to avoid loading image
+        super().__init__(NO_COLOR, (self.x, self.y, BLOCK_SIZE, BLOCK_SIZE), 0, 0, "")
+
+    def update_block(self, new_type, preloaded_image):
         self.material_type = new_type
         self.im
         #image_file
