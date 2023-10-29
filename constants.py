@@ -95,9 +95,10 @@ UPGRADE_ORDER = sorted(UPGRADE_ORDER, key=lambda xxxx: UPGRADE_COSTS[xxxx[0]][xx
 
 BLOCK_SIZE = 50
 
-BLOCK_NAMES = ["EMPTY", "DIRT", "STONE", "COAL", "ROCK", "IRON", "LAVA"]
+BLOCK_NAMES = ["EMPTY", "DIRT", "STONE", "COAL", "ROCK", "IRON", "GOLD", "LAVA"]
 
 WORLD_DEPTH = 1000
+
 
 class BlockMaterial(Enum):
     EMPTY = 0
@@ -106,7 +107,8 @@ class BlockMaterial(Enum):
     COAL = 3
     ROCK = 4
     IRON = 5
-    LAVA = 6
+    GOLD = 6
+    LAVA = 7
 
 
 BIOME_SIZE = 30  # the amount of Y level blocks before new stuff can begin spawning
@@ -120,4 +122,6 @@ CODEBLOCK_COLORS = ["BLUE", "GREEN"]
 
 BACKDROPS = ["backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png"]
 
-WAIT_TIMES = [0, 0.5, 0.6, 1, 10, 2, 1]
+WAIT_TIMES = [0, 500, 600, 1000, 10000, 1200, 1500, 1]  # in milliseconds
+
+ENERGY_CONSUMPTIONS = [0, 5, 7, 10, 12, 20, 25, 9999]

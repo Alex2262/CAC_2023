@@ -42,7 +42,6 @@ class CodeBlock(RectTextButton):
             self.child.hold((mouse_pos[0], mouse_pos[1] + self.height))
 
         if self.parent is not None and self.parent.y + self.parent.height != self.y:
-            print("real")
             self.parent.child = None
             self.parent = None
 
@@ -119,18 +118,21 @@ class DrillForwards(CodeBlock):
 
         self.string_code = """
         
+new_col = min(max(0, self.col + self.direction[0]), SCREEN_WIDTH // BLOCK_SIZE - 1)
+new_row = self.row + self.direction[1]
 
-self.col = min(max(0, self.col + self.direction[0]), SCREEN_WIDTH // BLOCK_SIZE - 1)
-self.row += self.direction[1]
-
-self.x += self.direction[0] * BLOCK_SIZE
-
-if self.world.block_map[self.row][self.col] == BlockMaterial.LAVA.value:
+if self.world.block_map[new_row][new_col] == BlockMaterial.LAVA.value:
     self.die()
 else:
-    wait_time = WAIT_TIMES[self.world.block_map[self.row][self.col]]
+    wait_time = WAIT_TIMES[self.world.block_map[new_row][new_col]]
     
-    time.sleep(wait_time)
+    time.sleep(wait_time / 1000.0)
+    
+    self.col = new_col
+    self.row = new_row
+    self.energy -= ENERGY_CONSUMPTIONS[self.world.block_map[new_row][new_col]]
+
+    self.x += self.direction[0] * BLOCK_SIZE
     self.world.block_map[self.row][self.col] = BlockMaterial.EMPTY.value
         
         """

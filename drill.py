@@ -24,9 +24,9 @@ class World:
         for y in range(WORLD_DEPTH):
             block_row = []
             for x in range(SCREEN_WIDTH // BLOCK_SIZE):
-
-                lower_bound = int(BlockMaterial.DIRT.value)
-                upper_bound = min(max(y // BIOME_SIZE, BlockMaterial.COAL.value), len(BLOCK_NAMES)-1)
+                base_type = min(y // BIOME_SIZE, len(BLOCK_NAMES)-1)
+                lower_bound = max(BlockMaterial.DIRT.value, base_type - 1)
+                upper_bound = min(y // BIOME_SIZE + 2, len(BLOCK_NAMES) - 1)
                 material_type = BlockMaterial.EMPTY.value
 
                 # air is independent
@@ -53,7 +53,6 @@ class World:
         # Drill row + 1 because blocks start one row after the drill's row
 
         accepted_y_start = (drill_row - 1) + CENTER_Y // BLOCK_SIZE
-        print(accepted_y_start)
 
         for y in range(0, SCREEN_HEIGHT // BLOCK_SIZE, 1):
             if y - max(SCREEN_HEIGHT // BLOCK_SIZE - accepted_y_start, 0) < 0:
@@ -80,8 +79,12 @@ class Drill(ImageRectObject):
 
         self.main_block = None
         self.real_code_blocks = []
+        self.running = False
+        self.energy = STARTING_ENERGY
 
     def call_main(self):
+
+        self.running = True
 
         """
         This will execute whatever is stored inside the file which is the string code.
@@ -102,13 +105,11 @@ class Drill(ImageRectObject):
 
             next_block = next_block.child
 
-        print(code_string)
-
         exec(code_string)
 
-        print(self.row)
-        print(self.world.block_map[self.row][self.col])
         self.world.update_block_screen(self.row)
+
+        self.running = False
 
     def die(self):
         pass

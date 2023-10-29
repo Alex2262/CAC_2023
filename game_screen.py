@@ -1,4 +1,5 @@
 
+import threading
 from drill import *
 
 import math
@@ -8,6 +9,7 @@ def game_screen(screen, world, drill):
 
     # ----------------- Initializing Objects -----------------
 
+    drill_thread = None
     clock = pygame.time.Clock()  # Clock for adjusting the frames per second
     selected_object = None
 
@@ -67,6 +69,16 @@ def game_screen(screen, world, drill):
 
         clock.tick(60)
         pygame.display.update()
+
+        if not drill.running:
+            if drill_thread is not None:
+                drill_thread.join()
+
+            drill_thread = threading.Thread(target=drill.call_main, args=())
+            drill_thread.start()
+
+        if drill.energy < 0:
+            drill.die()
 
         # time += 1
         # if time % 60 == 0 and time >= 300:  # Wait 5 seconds
