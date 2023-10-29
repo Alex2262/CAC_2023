@@ -37,13 +37,13 @@ def code_screen(screen, drill):
     ]
 
     buttons = [
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 20, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 20, 180, 40), 0, 2,
                        "menu:0", "Menu", (197, 203, 214), 30),
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 70, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 70, 180, 40), 0, 2,
                        "menu:2", "Drill", (197, 203, 214), 30),
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 120, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 120, 180, 40), 0, 2,
                        "menu:3", "Tips", (197, 203, 214), 30),
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 500, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 500, 180, 40), 0, 2,
                        "zoom:center", "Center", (197, 203, 214), 30),
     ]
 

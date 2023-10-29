@@ -14,11 +14,11 @@ def game_screen(screen, world, drill):
     selected_object = None
 
     buttons = [
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 20, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 20, 180, 40), 0, 2,
                        "menu:0", "Menu", (197, 203, 214), 30),
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 70, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 70, 180, 40), 0, 2,
                        "menu:1", "Code", (197, 203, 214), 30),
-        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 120, 180, 40), 0, 0,
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 120, 180, 40), 0, 2,
                        "menu:3", "Tips", (197, 203, 214), 30),
     ]
 

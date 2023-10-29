@@ -183,18 +183,26 @@ class Container(CodeBlock):
         super().update_height()
 
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
-        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
         bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+
+        nested_child_heights = 0
+        nested_children = self.get_nested_children()
+        for nested_child in nested_children:
+            nested_child_heights += nested_child.height
+
+        left_rect_height = max(nested_child_heights, BASIC_CODE_BLOCK_HEIGHT // 2)
+
         self.height = top_rect_height + left_rect_height + bottom_rect_height
 
         if self.bottom_child is not None:
             self.bottom_child.assign_parent(self, BASIC_MODE)
 
     def draw(self, surface, selected):
+        self.update_height()
+
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
-        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
         bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
-        self.height = top_rect_height + left_rect_height + bottom_rect_height
+        left_rect_height = self.height - (top_rect_height + bottom_rect_height)
 
         left_rect_width = CONTAINER_LEFT_MARGIN
 
@@ -249,9 +257,10 @@ class Container(CodeBlock):
 
     def get_attachment_mode(self, position):
         # Assumes the object has been selected
+        self.update_height()
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
-        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
-        # bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = self.height - (top_rect_height + bottom_rect_height)
 
         # NESTING ATTACHMENT MODE
         if position[1] < self.y + top_rect_height:
@@ -270,9 +279,10 @@ class Container(CodeBlock):
             print(self.x, self.y, self.nested_child.x, self.nested_child.y)
 
     def is_selecting(self, mouse_pos):
+        self.update_height()
         top_rect_height = BASIC_CODE_BLOCK_HEIGHT
-        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
         bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = self.height - (top_rect_height + bottom_rect_height)
         left_rect_width = CONTAINER_LEFT_MARGIN
 
         # TOP RECT

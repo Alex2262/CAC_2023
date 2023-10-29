@@ -94,19 +94,24 @@ class Drill(ImageRectObject):
 
         """
 
+        if self.main_block is None:
+            return
+
+        if self.main_block.bottom_child is None:
+            return
+
         compiling = True
-        next_block = self.main_block.child
+        next_block = self.main_block.bottom_child
 
         code_string = ""
         while compiling:
             code_string += next_block.string_code
             code_string += "\nself.world.update_block_screen(self.row)"
 
-
-            if next_block.child is None:
+            if next_block.bottom_child is None:
                 break
 
-            next_block = next_block.child
+            next_block = next_block.bottom_child
 
         exec(code_string)
 
@@ -115,5 +120,5 @@ class Drill(ImageRectObject):
         self.running = False
 
     def die(self):
-        self.row= 0
+        self.row = 0
         self.energy = STARTING_ENERGY
