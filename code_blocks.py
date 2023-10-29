@@ -2,6 +2,10 @@
 
 from objects import *
 
+BASIC_CODE_BLOCK_HEIGHT = 30
+BASIC_CODE_BLOCK_WIDTH  = 200
+CONTAINER_LEFT_MARGIN   = 20
+
 
 class BackgroundDot(RectObject):
     def __init__(self, position):
@@ -22,10 +26,13 @@ class CodeBlock(RectTextButton):
         self.real_y = self.y
 
         self.is_template = is_template
+        self.is_container = False
+        self.is_parameter = False
+
         self.string_code = ""
         self.parent = None
         self.child = None  # blocks that are attached to bottom
-        # self.nested_children = []
+        self.parameters = []  # Takes 0 parameters
 
     def hold(self, mouse_pos):
         new_x = mouse_pos[0] - self.width // 2
@@ -49,31 +56,49 @@ class CodeBlock(RectTextButton):
         self.x = self.real_x + deltas[0]
         self.y = self.real_y + deltas[1]
 
+    def relocate_children(self):
+        if self.child is not None:  # Move child to the new location in a chain
+            self.child.assign_parent(self)
+        for parameter in self.parameters:
+            if parameter is not None:
+                parameter.assign_parent(self)
+
     def assign_parent(self, parent_block):
+
+        # Removing Parent
         if parent_block is None:
             if self.parent is not None:
                 self.parent.child = None
                 self.parent = None
-        elif parent_block.child == self:
-            self.real_x = parent_block.real_x
-            self.real_y = parent_block.real_y + parent_block.height
+            return
 
-            self.x = parent_block.x
-            self.y = parent_block.y + parent_block.height
-        elif parent_block.child is not None:
-            pass
-        else:
-            parent_block.child = self
-            self.parent = parent_block
-            self.real_x = parent_block.real_x
-            self.real_y = parent_block.real_y + parent_block.height
+        x_margin = 0
+        if parent_block.is_container and parent_block.nested_child == self:
+            x_margin = CONTAINER_LEFT_MARGIN
+        if self.is_parameter:
+            x_margin = 30
 
-            self.x = parent_block.x
-            self.y = parent_block.y + parent_block.height
-            parent_block.child = self
+        self.real_x = parent_block.real_x + x_margin
+        self.real_y = parent_block.real_y + parent_block.height
 
-            if self.child is not None:  # Move child to the new location in a chain
-                self.child.assign_parent(self)
+        self.x = parent_block.x + x_margin
+        self.y = parent_block.y + parent_block.height
+
+        self.relocate_children()
+
+        # Guard clause, parent child is self
+        if parent_block.child == self:
+            return
+
+        self.parent = parent_block
+
+        # Insertion
+        if parent_block.child is not None:
+            # Move the parent's old child to the end of this block's chain
+            chain = [self] + self.get_children()
+            parent_block.child.assign_parent(chain[-1])
+
+        parent_block.child = self
 
     def get_children(self):
         if self.child is None:
@@ -87,10 +112,100 @@ class CodeBlock(RectTextButton):
                          (self.x, self.y + self.height - 2, self.width, 3), 0, self.radius)
 
 
+class Container(CodeBlock):
+    def __init__(self, color, position, is_template, text='', text_color=(216, 222, 233), text_size=20):
+        super().__init__(color, (position[0], position[1], self.width, self.height),
+                         is_template, text, text_color, text_size)
+        self.is_container = True
+        self.nested_child = None
+
+    def draw(self, surface, selected):
+        top_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
+        bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        self.height = top_rect_height + left_rect_height + bottom_rect_height
+
+        left_rect_width = CONTAINER_LEFT_MARGIN
+
+        # TOP RECT
+        pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 255),
+                         (self.x, self.y, self.width, top_rect_height), self.border, self.radius)
+
+        if self.text != '':
+            self.text_surf = self.font.render(self.text, True, self.text_color)
+            surface.blit(self.text_surf, (self.x + (self.width / 2 - self.text_surf.get_width() / 2),
+                                          self.y + (top_rect_height / 2 - self.text_surf.get_height() / 2)))
+
+        # LEFT RECT
+        pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 255),
+                         (self.x, self.y + top_rect_height, left_rect_width, left_rect_height), self.border,
+                         self.radius)
+
+        # BOTTOM RECT
+        pygame.draw.rect(surface, (self.color[0], self.color[1], self.color[2], 255),
+                         (self.x, self.y + top_rect_height + left_rect_height, self.width, bottom_rect_height),
+                         self.border, self.radius)
+
+        if selected:
+            # TOP RECT
+            new_surface = pygame.Surface((self.width, top_rect_height), pygame.SRCALPHA)
+            new_surface.set_alpha(40)
+            new_surface.fill((0, 0, 0))
+            surface.blit(new_surface, (self.x, self.y))
+
+            # LEFT RECT
+            new_surface = pygame.Surface((left_rect_width, left_rect_height), pygame.SRCALPHA)
+            new_surface.set_alpha(40)
+            new_surface.fill((0, 0, 0))
+            surface.blit(new_surface, (self.x, self.y + top_rect_height))
+
+            # BOTTOM RECT
+            new_surface = pygame.Surface((self.width, bottom_rect_height), pygame.SRCALPHA)
+            new_surface.set_alpha(40)
+            new_surface.fill((0, 0, 0))
+            surface.blit(new_surface, (self.x, self.y + top_rect_height + left_rect_height))
+
+    def get_nested_children(self):
+        if self.nested_child is None:
+            return []
+
+        return [self.nested_child] + self.nested_child.get_children()
+
+    def relocate_children(self):
+        if self.child is not None:  # Move child to the new location in a chain
+            self.child.assign_parent(self)
+        if self.nested_child is not None:  # Move nested child to the new location in a chain
+            self.nested_child.assign_parent(self)
+
+    def is_selecting(self, mouse_pos):
+        top_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_height = max(len(self.get_nested_children()) * BASIC_CODE_BLOCK_HEIGHT, BASIC_CODE_BLOCK_HEIGHT // 2)
+        bottom_rect_height = BASIC_CODE_BLOCK_HEIGHT
+        left_rect_width = CONTAINER_LEFT_MARGIN
+
+        # TOP RECT
+        if self.x < mouse_pos[0] < self.x + self.width and \
+                self.y < mouse_pos[1] < self.y + top_rect_height:
+            return True
+
+        # LEFT RECT
+        if self.x < mouse_pos[0] < self.x + left_rect_width and \
+                self.y + top_rect_height < mouse_pos[1] < self.y + top_rect_height + left_rect_height:
+            return True
+
+        # BOTTOM RECT
+        if self.x < mouse_pos[0] < self.x + self.width and \
+                self.y + top_rect_height + left_rect_height < mouse_pos[1] < \
+                self.y + top_rect_height + left_rect_height + bottom_rect_height:
+            return True
+
+        return False
+
+
 class Main(CodeBlock):
     def __init__(self, position, is_template):
-        self.width = 200
-        self.height = 30
+        self.width = BASIC_CODE_BLOCK_WIDTH
+        self.height = BASIC_CODE_BLOCK_HEIGHT
         super().__init__((255, 0, 0),
                          (position[0], position[1], self.width, self.height), is_template, "Main")
 
@@ -100,15 +215,13 @@ class Main(CodeBlock):
 
         self.string_code = """
 
-# This is the main code it really doesn't do shit lolololol ok fuck
-
         """
 
 
 class DrillForwards(CodeBlock):
     def __init__(self, position, is_template):
-        self.width  = 200
-        self.height = 30
+        self.width  = BASIC_CODE_BLOCK_WIDTH
+        self.height = BASIC_CODE_BLOCK_HEIGHT
         super().__init__((0, 0, 255),
                          (position[0], position[1], self.width, self.height), is_template, "Drill Forwards")
 
@@ -140,8 +253,8 @@ else:
 
 class TurnLeft(CodeBlock):
     def __init__(self, position, is_template):
-        self.width  = 200
-        self.height = 30
+        self.width  = BASIC_CODE_BLOCK_WIDTH
+        self.height = BASIC_CODE_BLOCK_HEIGHT
         super().__init__((0, 0, 255), (position[0], position[1], self.width, self.height), is_template, "Turn Left")
 
         '''
@@ -158,8 +271,8 @@ self.direction = (-self.direction[1], self.direction[0])
 
 class TurnRight(CodeBlock):
     def __init__(self, position, is_template):
-        self.width  = 200
-        self.height = 30
+        self.width  = BASIC_CODE_BLOCK_WIDTH
+        self.height = BASIC_CODE_BLOCK_HEIGHT
         super().__init__((0, 0, 255), (position[0], position[1], self.width, self.height), is_template, "Turn Right")
 
         '''
@@ -174,20 +287,20 @@ self.direction = (self.direction[1], -self.direction[0])
         """
 
 
-class Test(CodeBlock):
+class Conditional(Container):
     def __init__(self, position, is_template):
-        self.width  = 200
-        self.height = 30
-        super().__init__((0, 0, 255), (position[0], position[1], self.width, self.height), is_template, "Test")
+        self.width = BASIC_CODE_BLOCK_WIDTH
+        self.height = BASIC_CODE_BLOCK_HEIGHT
+        super().__init__((245, 200, 0),
+                         (position[0], position[1], self.width, self.height), is_template, "if")
 
         '''
-        Turns the Drill Right (90°)
-        Rotation: Direction(x, y) -> Direction(y, -x)
+        Conditional
         '''
 
         self.string_code = """
-
-print(333)
+        
+if {parameters}:
 
         """
 

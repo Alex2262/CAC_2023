@@ -24,7 +24,7 @@ def code_screen(screen, drill):
         DrillForwards,
         TurnLeft,
         TurnRight,
-        Test
+        Conditional
     ]
 
     background_dots = []
