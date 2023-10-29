@@ -172,6 +172,24 @@ self.direction = (self.direction[1], -self.direction[0])
         """
 
 
+class Test(CodeBlock):
+    def __init__(self, position, is_template):
+        self.width  = 200
+        self.height = 30
+        super().__init__((0, 0, 255), (position[0], position[1], self.width, self.height), is_template, "Test")
+
+        '''
+        Turns the Drill Right (90°)
+        Rotation: Direction(x, y) -> Direction(y, -x)
+        '''
+
+        self.string_code = """
+
+print(333)
+
+        """
+
+
 
 
 

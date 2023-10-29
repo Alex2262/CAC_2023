@@ -89,4 +89,27 @@ class Drill(ImageRectObject):
         variables in the drill itself, and the world if necessary
 
         """
+
+        compiling = True
+        next_block = self.main_block.child
+
+        code_string = ""
+        while compiling:
+            code_string += next_block.string_code
+
+            if next_block.child is None:
+                break
+
+            next_block = next_block.child
+
+        print(code_string)
+
+        exec(code_string)
+
+        print(self.row)
+        print(self.world.block_map[self.row][self.col])
+        self.world.update_block_screen(self.row)
+
+    def die(self):
         pass
+

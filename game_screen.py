@@ -11,6 +11,20 @@ def game_screen(screen, world, drill):
     clock = pygame.time.Clock()  # Clock for adjusting the frames per second
     selected_object = None
 
+    buttons = [
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 20, 180, 40), 0, 0,
+                       "menu:0", "Menu", (197, 203, 214), 30),
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 70, 180, 40), 0, 0,
+                       "menu:1", "Code", (197, 203, 214), 30),
+        RectTextButton((150, 157, 171), (SCREEN_WIDTH - 190, 120, 180, 40), 0, 0,
+                       "menu:3", "Tips", (197, 203, 214), 30),
+    ]
+
+    backdrop = ImageRectObject(NO_COLOR, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 0, 0, "backdrops/Backdrop1.png")
+    backdrop.image = pygame.transform.scale(backdrop.image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    time = 0
+
     # ----------------- The Main GUI Loop -----------------
     running = True
     while running:
@@ -42,6 +56,16 @@ def game_screen(screen, world, drill):
         selected_object = get_selected_object(mouse_pos, buttons)
 
         screen.fill(pygame.Color("White"))
+
+        # update biome
+        # backdrop.image = BACKDROPS[drill.row // BIOME_SIZE]
+        backdrop.draw(screen, selected_object)
+
+        draw_blocks(screen, world)
+        draw_buttons(screen, selected_object, buttons)
+        drill.draw(screen, selected_object)
+
+        clock.tick(60)
         pygame.display.update()
 
         # time += 1

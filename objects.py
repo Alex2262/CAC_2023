@@ -43,6 +43,9 @@ class ImageRectObject(RectObject):
         self.image = pygame.image.load(self.image_file).convert_alpha() if self.image_file != "" else None
 
     def draw(self, surface, selected):
+        if self.image is None:
+            return
+
         surface.blit(self.image, (self.x, self.y))
 
 
@@ -55,6 +58,8 @@ class Block(ImageRectObject):
 
         self.row = row
         self.col = col
+        self.image_file = ""
+        self.image = preloaded_image
 
         self.x = col * BLOCK_SIZE
         self.y = (row + 8) * BLOCK_SIZE
@@ -64,8 +69,7 @@ class Block(ImageRectObject):
 
     def update_block(self, new_type, preloaded_image):
         self.material_type = new_type
-        self.im
-        #image_file
+        self.image = preloaded_image
 
 
 # ----------------- The Rectangular Text Object -----------------

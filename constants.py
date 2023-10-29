@@ -97,6 +97,7 @@ BLOCK_SIZE = 50
 
 BLOCK_NAMES = ["EMPTY", "DIRT", "STONE", "COAL", "ROCK", "IRON", "LAVA"]
 
+WORLD_DEPTH = 1000
 
 class BlockMaterial(Enum):
     EMPTY = 0
@@ -112,7 +113,11 @@ BIOME_SIZE = 30  # the amount of Y level blocks before new stuff can begin spawn
 
 DIRECTIONS = {"north": (0, -1), "east": (1, 0), "south": (0, 1), "west": (-1, 0),}
 
-BLOCK_IMAGES = []
+BLOCK_IMAGES = ["", "blocks/dirt.png", "blocks/stone.png", "blocks/coal.png", "blocks/iron.png", "blocks/gold.png",
+                "blocks/hard_stone.png", "blocks/lava.png" , "" , "", ""]
 
 CODEBLOCK_COLORS = ["BLUE", "GREEN"]
 
+BACKDROPS = ["backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png", "backdrops/Backdrop1.png"]
+
+WAIT_TIMES = [0, 0.5, 0.6, 1, 10, 2, 1]
